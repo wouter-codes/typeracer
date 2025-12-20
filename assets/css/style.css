@@ -28,11 +28,28 @@ h1 {
 }
 
 /* Game section */
-#game {
+#game .input-group * {
+    border-radius: 0;
+}
+
+#game input.form-control-lg {
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+#game .btn {
+    color: black;
+    border-color: var(--color-primary);
+    border-width: 2px;
+}
+
+#game .btn:hover {
+    background-color: var(--color-primary);
+    color: white;
 }
 
 /* Results section */
-#results .card {
+.glow-border {
     border-radius: 8px;
     border-color: transparent;
     box-shadow: 0 0 5px var(--color-primary), 0 0 10px rgba(255, 132, 0, 0.6),
