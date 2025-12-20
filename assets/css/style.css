@@ -3,7 +3,7 @@
 :root {
     --font-primary: "Nunito", sans-serif;
     --font-secondary: "Alegreya", serif;
-    --background-color-primary: #ff8400;
+    --color-primary: #ff8400;
 }
 
 /* global styles */
@@ -17,7 +17,7 @@ h1 {
 
 /* Banner styles */
 .banner {
-    background-color: var(--background-color-primary);
+    background-color: var(--color-primary);
     color: white;
     padding: 20px 0;
 }
@@ -35,7 +35,6 @@ h1 {
 #results .card {
     border-radius: 8px;
     border-color: transparent;
-    box-shadow: 0 0 5px var(--background-color-primary),
-        0 0 10px rgba(255, 132, 0, 0.6), 0 0 30px rgba(255, 132, 0, 0.4),
-        0 0 20px rgba(255, 132, 0, 0.2);
+    box-shadow: 0 0 5px var(--color-primary), 0 0 10px rgba(255, 132, 0, 0.6),
+        0 0 30px rgba(255, 132, 0, 0.4), 0 0 20px rgba(255, 132, 0, 0.2);
 }
