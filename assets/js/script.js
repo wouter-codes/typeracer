@@ -37,6 +37,25 @@ function getRandomText(difficulty) {
 }
 
 /**
+ * Auto-resize a textarea to fit its content by adjusting rows
+ * @param {HTMLTextAreaElement} textarea - The textarea element to resize
+ */
+function autoResizeTextarea(textarea) {
+    // Reset to 1 row to get accurate scrollHeight
+    textarea.rows = 1;
+    // Calculate how many rows are needed (line height is approximately 24px for form-control-lg)
+    const lineHeight =
+        parseInt(window.getComputedStyle(textarea).lineHeight) || 24;
+    const paddingTop =
+        parseInt(window.getComputedStyle(textarea).paddingTop) || 0;
+    const paddingBottom =
+        parseInt(window.getComputedStyle(textarea).paddingBottom) || 0;
+    const contentHeight = textarea.scrollHeight - paddingTop - paddingBottom;
+    const rows = Math.ceil(contentHeight / lineHeight);
+    textarea.rows = Math.max(1, rows);
+}
+
+/**
  * Display the sample text based on selected difficulty
  */
 function displaySampleText() {
@@ -49,9 +68,11 @@ function displaySampleText() {
         const randomText = getRandomText(selectedValue);
         promptInput.value = randomText;
         promptInput.placeholder = randomText;
+        autoResizeTextarea(promptInput);
     } else {
         promptInput.value = "";
         promptInput.placeholder = "Please select a difficulty level";
+        autoResizeTextarea(promptInput);
     }
 }
 

@@ -37,6 +37,11 @@ h1 {
     font-weight: bold;
 }
 
+#prompt-input {
+    overflow: hidden;
+    resize: none;
+}
+
 #game .btn {
     color: black;
     border-color: var(--color-primary);
