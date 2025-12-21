@@ -30,6 +30,12 @@ const wpmDisplay = document.getElementById("wpm-display");
 // Timer variables
 let startTime = null;
 let testStarted = false;
+// Track last shown text per difficulty level
+let lastTextByDifficulty = {
+    easy: null,
+    medium: null,
+    hard: null,
+};
 
 /**
  * Get a random text based on the selected difficulty level
@@ -38,8 +44,21 @@ let testStarted = false;
  */
 function getRandomText(difficulty) {
     const texts = sampleTexts[difficulty];
-    const randomIndex = Math.floor(Math.random() * texts.length);
-    return texts[randomIndex];
+
+    // If there's only one text, return it
+    if (texts.length === 1) {
+        return texts[0];
+    }
+
+    // Get a random text that's different from the last one shown for this difficulty
+    let randomIndex;
+    let newText;
+    do {
+        randomIndex = Math.floor(Math.random() * texts.length);
+        newText = texts[randomIndex];
+    } while (newText === lastTextByDifficulty[difficulty]);
+
+    return newText;
 }
 
 /**
@@ -53,6 +72,7 @@ function displaySampleText() {
         selectedValue === "hard"
     ) {
         const randomText = getRandomText(selectedValue);
+        lastTextByDifficulty[selectedValue] = randomText; // Track the current text for this difficulty
         promptInput.value = randomText;
         // Display the text with all words as pending (unstyled)
         updatePromptDisplay(randomText, "");
