@@ -22,7 +22,6 @@ const difficultySelect = document.getElementById("inputGroupSelect01");
 const promptInput = document.getElementById("prompt-input");
 const promptDisplay = document.getElementById("prompt-display");
 const textArea = document.getElementById("game-text-area");
-const stopButton = document.getElementById("button-stop");
 const retryButton = document.getElementById("button-retry");
 const timeDisplay = document.getElementById("time-display");
 const levelDisplay = document.getElementById("level-display");
@@ -167,24 +166,11 @@ function calculateWpm(correctWords, timeInSeconds) {
 }
 
 /**
- * Disable the stop button
+ * Initialize the page on load
  */
-function disableStopButton() {
-    stopButton.disabled = true;
-}
-
-/**
- * Enable the stop button
- */
-function enableStopButton() {
-    stopButton.disabled = false;
-}
-
-/**
- * Initialize button states on page load
- */
-function initializeButtonStates() {
-    disableStopButton();
+function initializePage() {
+    // Disable text area until difficulty is selected
+    textArea.disabled = true;
 }
 
 /**
@@ -214,9 +200,6 @@ function prepareTest() {
 
     // Reset WPM display
     updateWpmDisplay(0);
-
-    // Update button states
-    enableStopButton();
 }
 
 /**
@@ -246,9 +229,6 @@ function stopTest() {
     textArea.disabled = true;
     textArea.placeholder =
         "Select a difficulty and start typing to begin the test";
-
-    // Update button states
-    disableStopButton();
 }
 
 /**
@@ -271,9 +251,6 @@ function retryTest() {
 
     // Reset WPM display
     updateWpmDisplay(0);
-
-    // Update button states
-    enableStopButton();
 }
 
 /**
@@ -330,8 +307,20 @@ function handleTypingInput() {
     updatePromptDisplay(sampleText, typedText);
 }
 
+/**
+ * Handle keydown events to stop test on Enter key
+ * @param {KeyboardEvent} event - The keyboard event
+ */
+function handleKeyDown(event) {
+    if (event.key === "Enter") {
+        event.preventDefault(); // Prevent new line in textarea
+        if (testStarted) {
+            stopTest();
+        }
+    }
+}
+
 // Event listeners
-stopButton.addEventListener("click", stopTest);
 retryButton.addEventListener("click", retryTest);
 
 // Prepare test when difficulty changes
@@ -340,8 +329,11 @@ difficultySelect.addEventListener("change", prepareTest);
 // Real-time typing feedback
 textArea.addEventListener("input", handleTypingInput);
 
-// Initialize button states when the page loads
-initializeButtonStates();
+// Stop test when Enter key is pressed
+textArea.addEventListener("keydown", handleKeyDown);
+
+// Initialize the page
+initializePage();
 
 /**
  * Auto-resize a textarea to fit its content by adjusting rows
