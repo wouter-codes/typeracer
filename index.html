@@ -21,7 +21,8 @@
                     <h1>TyperRacer</h1>
                 </div>
                 <div class="col-12">
-                    <button class="btn btn-light mt-3">Instructions</button>
+                    <button class="btn btn-light mt-3" data-bs-toggle="modal"
+                        data-bs-target="#instructionsModal">Instructions</button>
                 </div>
             </div>
         </div>
@@ -72,6 +73,38 @@
             </div>
         </div>
     </main>
+
+    <!-- Instructions Modal -->
+    <div class="modal fade" id="instructionsModal" tabindex="-1" aria-labelledby="instructionsModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="instructionsModalLabel">How to Play TyperRacer</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ol>
+                        <li><strong>Select a difficulty level</strong> from the dropdown menu (Easy, Medium, or Hard).
+                        </li>
+                        <li><strong>Start typing</strong> the text shown in the prompt area. The timer will begin
+                            automatically when you type your first character.</li>
+                        <li><strong>Watch your progress</strong> — correctly typed words turn <span
+                                class="text-primary fw-bold">blue</span>, incorrect words turn <span
+                                class="text-danger fw-bold">red</span>.</li>
+                        <li><strong>Press Enter</strong> when you're finished to stop the test and see your results.
+                        </li>
+                        <li><strong>Click Retry</strong> to try again with a new random text.</li>
+                    </ol>
+                    <p class="mb-0"><strong>Tip:</strong> Focus on accuracy first — only correctly typed words count
+                        towards your WPM score!</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Got it!</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
