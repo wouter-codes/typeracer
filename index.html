@@ -44,8 +44,9 @@
                     </div>
                     <h5 class="input-group mb-3">Test your typing speed by typing the text shown below:</h5>
                     <div class="mb-3">
-                        <textarea id="prompt-input" class="form-control form-control-lg" rows="1"
-                            placeholder="Placeholder text" aria-label="Prompted text for typeracer" readonly></textarea>
+                        <div id="prompt-display" class="form-control form-control-lg"
+                            aria-label="Prompted text for typeracer"></div>
+                        <input type="hidden" id="prompt-input">
                     </div>
                     <div class="input-group mb-3">
                         <label for="game-text-area" class="form-label visually-hidden">Text area for user
@@ -64,9 +65,9 @@
                     <div class="card w-100">
                         <div class="glow-border card-body text-center">
                             <h2 class="card-title mb-3">Results</h2>
-                            <p class="card-text">Level: Easy</p>
-                            <p class="card-text">Time: 0s</p>
-                            <p class="card-text">WPM: 0</p>
+                            <p class="card-text" id="level-display">Level: Easy</p>
+                            <p class="card-text" id="time-display">Time: 0s</p>
+                            <p class="card-text" id="wpm-display">WPM: 0</p>
                         </div>
                     </div>
                 </div>

@@ -20,10 +20,17 @@ const sampleTexts = {
 // DOM elements
 const difficultySelect = document.getElementById("inputGroupSelect01");
 const promptInput = document.getElementById("prompt-input");
+const promptDisplay = document.getElementById("prompt-display");
 const textArea = document.getElementById("game-text-area");
 const startButton = document.getElementById("button-start");
 const stopButton = document.getElementById("button-stop");
 const retryButton = document.getElementById("button-retry");
+const timeDisplay = document.getElementById("time-display");
+const levelDisplay = document.getElementById("level-display");
+const wpmDisplay = document.getElementById("wpm-display");
+
+// Timer variables
+let startTime = null;
 
 /**
  * Get a random text based on the selected difficulty level
@@ -34,25 +41,6 @@ function getRandomText(difficulty) {
     const texts = sampleTexts[difficulty];
     const randomIndex = Math.floor(Math.random() * texts.length);
     return texts[randomIndex];
-}
-
-/**
- * Auto-resize a textarea to fit its content by adjusting rows
- * @param {HTMLTextAreaElement} textarea - The textarea element to resize
- */
-function autoResizeTextarea(textarea) {
-    // Reset to 1 row to get accurate scrollHeight
-    textarea.rows = 1;
-    // Calculate how many rows are needed (line height is approximately 24px for form-control-lg)
-    const lineHeight =
-        parseInt(window.getComputedStyle(textarea).lineHeight) || 24;
-    const paddingTop =
-        parseInt(window.getComputedStyle(textarea).paddingTop) || 0;
-    const paddingBottom =
-        parseInt(window.getComputedStyle(textarea).paddingBottom) || 0;
-    const contentHeight = textarea.scrollHeight - paddingTop - paddingBottom;
-    const rows = Math.ceil(contentHeight / lineHeight);
-    textarea.rows = Math.max(1, rows);
 }
 
 /**
@@ -67,13 +55,151 @@ function displaySampleText() {
     ) {
         const randomText = getRandomText(selectedValue);
         promptInput.value = randomText;
-        promptInput.placeholder = randomText;
-        autoResizeTextarea(promptInput);
+        // Display the text with all words as pending (unstyled)
+        updatePromptDisplay(randomText, "");
     } else {
         promptInput.value = "";
-        promptInput.placeholder = "Please select a difficulty level";
-        autoResizeTextarea(promptInput);
+        promptDisplay.innerHTML =
+            "<span class='text-muted'>Please select a difficulty level</span>";
     }
+}
+
+/**
+ * Record the current time as the start time
+ */
+function recordStartTime() {
+    startTime = Date.now();
+}
+
+/**
+ * Calculate the elapsed time in seconds since the test started
+ * @returns {number} Elapsed time in seconds
+ */
+function calculateElapsedTime() {
+    if (startTime === null) {
+        return 0;
+    }
+    const endTime = Date.now();
+    const elapsedMilliseconds = endTime - startTime;
+    return elapsedMilliseconds / 1000;
+}
+
+/**
+ * Reset the timer to its initial state
+ */
+function resetTimer() {
+    startTime = null;
+}
+
+/**
+ * Update the time display in the results section
+ * @param {number} timeInSeconds - The time to display in seconds
+ */
+function updateTimeDisplay(timeInSeconds) {
+    timeDisplay.textContent = `Time: ${timeInSeconds.toFixed(2)}s`;
+}
+
+/**
+ * Update the level display in the results section
+ * @param {string} level - The difficulty level to display
+ */
+function updateLevelDisplay(level) {
+    // Capitalize the first letter of the level
+    const formattedLevel = level.charAt(0).toUpperCase() + level.slice(1);
+    levelDisplay.textContent = `Level: ${formattedLevel}`;
+}
+
+/**
+ * Update the WPM display in the results section
+ * @param {number} wpm - The words per minute to display
+ */
+function updateWpmDisplay(wpm) {
+    wpmDisplay.textContent = `WPM: ${wpm}`;
+}
+
+/**
+ * Get the words from a text string
+ * @param {string} text - The text to split into words
+ * @returns {string[]} An array of words
+ */
+function getWordsFromText(text) {
+    return text
+        .trim()
+        .split(/\s+/)
+        .filter((word) => word.length > 0);
+}
+
+/**
+ * Count the number of correctly typed words
+ * @param {string} sampleText - The original sample text
+ * @param {string} typedText - The text typed by the user
+ * @returns {number} The number of correctly typed words
+ */
+function countCorrectWords(sampleText, typedText) {
+    const sampleWords = getWordsFromText(sampleText);
+    const typedWords = getWordsFromText(typedText);
+
+    let correctCount = 0;
+
+    for (let i = 0; i < typedWords.length; i++) {
+        // Check if there's a corresponding word in the sample text
+        if (i < sampleWords.length && typedWords[i] === sampleWords[i]) {
+            correctCount++;
+        }
+    }
+
+    return correctCount;
+}
+
+/**
+ * Calculate words per minute
+ * @param {number} correctWords - The number of correctly typed words
+ * @param {number} timeInSeconds - The time taken in seconds
+ * @returns {number} The words per minute, rounded to a whole number
+ */
+function calculateWpm(correctWords, timeInSeconds) {
+    if (timeInSeconds <= 0) {
+        return 0;
+    }
+    const timeInMinutes = timeInSeconds / 60;
+    const wpm = correctWords / timeInMinutes;
+    return Math.round(wpm);
+}
+
+/**
+ * Disable the start button
+ */
+function disableStartButton() {
+    startButton.disabled = true;
+}
+
+/**
+ * Enable the start button
+ */
+function enableStartButton() {
+    startButton.disabled = false;
+}
+
+/**
+ * Disable the stop button
+ */
+function disableStopButton() {
+    stopButton.disabled = true;
+}
+
+/**
+ * Enable the stop button
+ */
+function enableStopButton() {
+    stopButton.disabled = false;
+}
+
+/**
+ * Initialize button states on page load
+ */
+function initializeButtonStates() {
+    enableStartButton();
+    disableStopButton();
 }
 
 /**
@@ -95,14 +221,50 @@ function startTest() {
     textArea.disabled = false;
     textArea.placeholder = "Start typing here...";
     textArea.focus();
+
+    // Reset and start the timer
+    resetTimer();
+    recordStartTime();
+    updateTimeDisplay(0);
+
+    // Update level display
+    updateLevelDisplay(selectedValue);
+
+    // Reset WPM display
+    updateWpmDisplay(0);
+
+    // Update button states
+    disableStartButton();
+    enableStopButton();
 }
 
 /**
  * Stop the typing test
  */
 function stopTest() {
+    // Calculate and display elapsed time
+    const elapsedTime = calculateElapsedTime();
+    updateTimeDisplay(elapsedTime);
+
+    // Get the sample text and typed text
+    const sampleText = promptInput.value;
+    const typedText = textArea.value;
+
+    // Calculate and display correct words and WPM
+    const correctWords = countCorrectWords(sampleText, typedText);
+    const wpm = calculateWpm(correctWords, elapsedTime);
+    updateWpmDisplay(wpm);
+
+    // Update level display with current difficulty
+    const selectedValue = difficultySelect.value;
+    updateLevelDisplay(selectedValue);
+
     textArea.disabled = true;
     textArea.placeholder = "Click the start button to begin the test";
+
+    // Update button states
+    enableStartButton();
+    disableStopButton();
 }
 
 /**
@@ -117,6 +279,66 @@ function retryTest() {
     textArea.disabled = false;
     textArea.placeholder = "Start typing here...";
     textArea.focus();
+
+    // Reset and start the timer
+    resetTimer();
+    recordStartTime();
+    updateTimeDisplay(0);
+
+    // Reset WPM display
+    updateWpmDisplay(0);
+
+    // Update button states
+    disableStartButton();
+    enableStopButton();
+}
+
+/**
+ * Update the prompt display with highlighted words
+ * @param {string} sampleText - The original sample text
+ * @param {string} typedText - The text typed by the user so far
+ */
+function updatePromptDisplay(sampleText, typedText) {
+    const sampleWords = getWordsFromText(sampleText);
+    const typedWords = getWordsFromText(typedText);
+
+    // Build HTML with highlighted words
+    let html = "";
+
+    for (let i = 0; i < sampleWords.length; i++) {
+        const sampleWord = sampleWords[i];
+
+        if (i < typedWords.length) {
+            // User has typed this word
+            const typedWord = typedWords[i];
+            if (typedWord === sampleWord) {
+                // Correct word - highlight in blue
+                html += `<span class="word-correct">${sampleWord}</span>`;
+            } else {
+                // Incorrect word - highlight in red
+                html += `<span class="word-incorrect">${sampleWord}</span>`;
+            }
+        } else {
+            // User hasn't typed this word yet - pending (no highlight)
+            html += `<span class="word-pending">${sampleWord}</span>`;
+        }
+
+        // Add space between words (except after the last word)
+        if (i < sampleWords.length - 1) {
+            html += " ";
+        }
+    }
+
+    promptDisplay.innerHTML = html;
+}
+
+/**
+ * Handle real-time input from the user
+ */
+function handleTypingInput() {
+    const sampleText = promptInput.value;
+    const typedText = textArea.value;
+    updatePromptDisplay(sampleText, typedText);
 }
 
 // Event listeners
@@ -126,3 +348,28 @@ retryButton.addEventListener("click", retryTest);
 
 // Update displayed text when difficulty changes
 difficultySelect.addEventListener("change", displaySampleText);
+
+// Real-time typing feedback
+textArea.addEventListener("input", handleTypingInput);
+
+// Initialize button states when the page loads
+initializeButtonStates();
+
+/**
+ * Auto-resize a textarea to fit its content by adjusting rows
+ * @param {HTMLTextAreaElement} textarea - The textarea element to resize
+ */
+function autoResizeTextarea(textarea) {
+    // Reset to 1 row to get accurate scrollHeight
+    textarea.rows = 1;
+    // Calculate how many rows are needed (line height is approximately 24px for form-control-lg)
+    const lineHeight =
+        parseInt(window.getComputedStyle(textarea).lineHeight) || 24;
+    const paddingTop =
+        parseInt(window.getComputedStyle(textarea).paddingTop) || 0;
+    const paddingBottom =
+        parseInt(window.getComputedStyle(textarea).paddingBottom) || 0;
+    const contentHeight = textarea.scrollHeight - paddingTop - paddingBottom;
+    const rows = Math.ceil(contentHeight / lineHeight);
+    textarea.rows = Math.max(1, rows);
+}
