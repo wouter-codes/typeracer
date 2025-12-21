@@ -22,7 +22,6 @@ const difficultySelect = document.getElementById("inputGroupSelect01");
 const promptInput = document.getElementById("prompt-input");
 const promptDisplay = document.getElementById("prompt-display");
 const textArea = document.getElementById("game-text-area");
-const startButton = document.getElementById("button-start");
 const stopButton = document.getElementById("button-stop");
 const retryButton = document.getElementById("button-retry");
 const timeDisplay = document.getElementById("time-display");
@@ -31,6 +30,7 @@ const wpmDisplay = document.getElementById("wpm-display");
 
 // Timer variables
 let startTime = null;
+let testStarted = false;
 
 /**
  * Get a random text based on the selected difficulty level
@@ -167,20 +167,6 @@ function calculateWpm(correctWords, timeInSeconds) {
 }
 
 /**
- * Disable the start button
- */
-function disableStartButton() {
-    startButton.disabled = true;
-}
-
-/**
- * Enable the start button
- */
-function enableStartButton() {
-    startButton.disabled = false;
-}
-
-/**
  * Disable the stop button
  */
 function disableStopButton() {
@@ -198,18 +184,15 @@ function enableStopButton() {
  * Initialize button states on page load
  */
 function initializeButtonStates() {
-    enableStartButton();
     disableStopButton();
 }
 
 /**
- * Start the typing test
+ * Prepare the typing test when difficulty is selected
  */
-function startTest() {
-    // Check if a difficulty is selected
+function prepareTest() {
     const selectedValue = difficultySelect.value;
     if (selectedValue === "Choose..." || selectedValue === "") {
-        alert("Please select a difficulty level first!");
         return;
     }
 
@@ -219,12 +202,11 @@ function startTest() {
     // Clear and enable the text area
     textArea.value = "";
     textArea.disabled = false;
-    textArea.placeholder = "Start typing here...";
-    textArea.focus();
+    textArea.placeholder = "Start typing to begin the test...";
 
-    // Reset and start the timer
+    // Reset timer but don't start it yet (will start on first keystroke)
     resetTimer();
-    recordStartTime();
+    testStarted = false;
     updateTimeDisplay(0);
 
     // Update level display
@@ -234,7 +216,6 @@ function startTest() {
     updateWpmDisplay(0);
 
     // Update button states
-    disableStartButton();
     enableStopButton();
 }
 
@@ -259,11 +240,14 @@ function stopTest() {
     const selectedValue = difficultySelect.value;
     updateLevelDisplay(selectedValue);
 
+    // Reset test state
+    testStarted = false;
+
     textArea.disabled = true;
-    textArea.placeholder = "Click the start button to begin the test";
+    textArea.placeholder =
+        "Select a difficulty and start typing to begin the test";
 
     // Update button states
-    enableStartButton();
     disableStopButton();
 }
 
@@ -277,19 +261,18 @@ function retryTest() {
     // Clear and enable the text area
     textArea.value = "";
     textArea.disabled = false;
-    textArea.placeholder = "Start typing here...";
+    textArea.placeholder = "Start typing to begin the test...";
     textArea.focus();
 
-    // Reset and start the timer
+    // Reset timer but don't start it yet (will start on first keystroke)
     resetTimer();
-    recordStartTime();
+    testStarted = false;
     updateTimeDisplay(0);
 
     // Reset WPM display
     updateWpmDisplay(0);
 
     // Update button states
-    disableStartButton();
     enableStopButton();
 }
 
@@ -336,18 +319,23 @@ function updatePromptDisplay(sampleText, typedText) {
  * Handle real-time input from the user
  */
 function handleTypingInput() {
+    // Start the timer on first keystroke
+    if (!testStarted && textArea.value.length > 0) {
+        testStarted = true;
+        recordStartTime();
+    }
+
     const sampleText = promptInput.value;
     const typedText = textArea.value;
     updatePromptDisplay(sampleText, typedText);
 }
 
 // Event listeners
-startButton.addEventListener("click", startTest);
 stopButton.addEventListener("click", stopTest);
 retryButton.addEventListener("click", retryTest);
 
-// Update displayed text when difficulty changes
-difficultySelect.addEventListener("change", displaySampleText);
+// Prepare test when difficulty changes
+difficultySelect.addEventListener("change", prepareTest);
 
 // Real-time typing feedback
 textArea.addEventListener("input", handleTypingInput);
